@@ -1,6 +1,5 @@
 FROM golang:1.12.0-alpine3.9
 RUN mkdir /app
-RUN export GO111MODULE=on
 ADD . /app
 WORKDIR /app
 RUN apk add --no-cache git
