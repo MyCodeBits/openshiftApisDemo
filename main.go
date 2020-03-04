@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"k8s.io/client-go/tools/clientcmd"
 	"log"
@@ -54,7 +55,18 @@ func main() {
 	}
 	fmt.Println("Got client ::")
 	fmt.Println(coreclient)
-
+	//coreclient.Pods(namespace).Get("aa", metav1.GetOptions{})
+	svcList, e := coreclient.ServiceAccounts(namespace).List(
+		metav1.ListOptions{},
+	)
+	if (e != nil) {
+		fmt.Println("Got error while listing Svc Account...")
+		panic(err)
+	}
+	fmt.Println("Listing Svc Accounts : ")
+	fmt.Println(svcList)
+	svcListMar, _ := json.Marshal(svcList)
+	fmt.Println(svcListMar)
 	// INSTANTIATE THE TEMPLATE.
 
 	// 2. Create Secrets
