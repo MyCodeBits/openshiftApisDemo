@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"fmt"
 	"k8s.io/client-go/tools/clientcmd"
 	"log"
@@ -55,7 +55,9 @@ func main() {
 	}
 	fmt.Println("Got client ::")
 	fmt.Println(coreclient)
+	/*
 	//coreclient.Pods(namespace).Get("aa", metav1.GetOptions{})
+
 	svcList, e := coreclient.ServiceAccounts(namespace).List(
 		metav1.ListOptions{},
 	)
@@ -67,6 +69,7 @@ func main() {
 	fmt.Println(svcList)
 	svcListMar, _ := json.Marshal(svcList)
 	fmt.Println(svcListMar)
+	*/
 	// INSTANTIATE THE TEMPLATE.
 
 	// 2. Create Secrets
@@ -82,6 +85,7 @@ func main() {
 		"key2": "value2",
 	}
 	fmt.Println("Creating Svc Account")
+
 
 	svcAcc, err := coreclient.ServiceAccounts(namespace).Create(&corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
