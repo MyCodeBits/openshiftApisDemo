@@ -1,0 +1,39 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  creationTimestamp: '2020-02-28T18:47:20Z'
+  name: svcacc-docker
+  namespace: oc-svc-acc-create
+  resourceVersion: '688574'
+  selfLink: >-
+    /apis/build.openshift.io/v1/namespaces/oc-svc-acc-create/buildconfigs/svcacc-docker
+  uid: c035a567-5a5a-11ea-89e4-0800279d9dce
+spec:
+  failedBuildsHistoryLimit: 5
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'svcacc-docker:latest'
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    git:
+      ref: master
+      uri: 'https://github.com/MyCodeBits/openshiftApisDemo.git'
+    type: Git
+  strategy:
+    dockerStrategy: {}
+    type: Docker
+  successfulBuildsHistoryLimit: 5
+  triggers:
+    - type: ConfigChange
+    - generic:
+        secret: 15586ae915fb3b3c
+      type: Generic
+    - github:
+        secret: d7c4fa7a27f7882c
+      type: GitHub
+status:
+  lastVersion: 26

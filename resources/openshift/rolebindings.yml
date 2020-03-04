@@ -1,0 +1,29 @@
+apiVersion: rbac.authorization.k8s.io/v1
+# This role binding allows "svc:default" to access pods and sa in the "default" namespace.
+kind: RoleBinding
+metadata:
+  name: access-pods
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: default # Name is case sensitive
+    apiGroup: ""
+roleRef:
+  kind: Role #this must be Role or ClusterRole
+  name: pod-access # this must match the name of the Role or ClusterRole you wish to bind to
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+# This role binding allows "svc:default" to access pods and sa in the "default" namespace.
+kind: RoleBinding
+metadata:
+  name: access-sa
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: default # Name is case sensitive
+    apiGroup: ""
+roleRef:
+  kind: Role #this must be Role or ClusterRole
+  name: sa-access # this must match the name of the Role or ClusterRole you wish to bind to
+  apiGroup: rbac.authorization.k8s.io

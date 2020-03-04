@@ -79,7 +79,7 @@ func main() {
 
 
 	// 4. Create Svc Account
-	var svcAccName = "test_sc"
+	var svcAccName = "prog-sc"
 	var labels = map[string]string{
 		"key1": "value1",
 		"key2": "value2",
