@@ -14,20 +14,16 @@ import (
 )
 
 func main() {
-	fmt.Println("Openshift APIs Demo ....")
+	fmt.Println("main()::RedHat Openshift APIs Demo ....")
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello World")
-	})
-
-	fmt.Println("=======================================================")
-	fmt.Println("Entered Main() ...")
+	fmt.Println("main()::=======================================================")
 	// Instantiate loader for kubeconfig file.
+	fmt.Println("\n main()::Reading kubeconfig ..: ")
 	kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 		clientcmd.NewDefaultClientConfigLoadingRules(),
 		&clientcmd.ConfigOverrides{},
 	)
-	fmt.Println("Got kubeconfig ..: ")
+	fmt.Println("main()::Done reading kubeconfig ..: ")
 	fmt.Println(kubeconfig)
 
 	// Determine the Namespace referenced by the current context in the
@@ -36,7 +32,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Got Namespace ..: ")
+	fmt.Println("\nmain()::Current Namespace ..: ")
 	fmt.Println(namespace)
 
 	// Get a rest.Config from the kubeconfig file.  This will be passed into all
@@ -45,7 +41,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Got restconfig ..: ")
+	fmt.Println("\nmain()::Created clientConfig")
 	fmt.Println(restconfig)
 
 	// Create a Kubernetes core/v1 client.
@@ -53,7 +49,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Got client ::")
+	fmt.Println("\nmain()::Created client")
 	fmt.Println(coreclient)
 	/*
 	//coreclient.Pods(namespace).Get("aa", metav1.GetOptions{})
@@ -84,7 +80,7 @@ func main() {
 		"key1": "value1",
 		"key2": "value2",
 	}
-	fmt.Println("Creating Svc Account")
+	fmt.Println("\nmain()::Creating Svc Account")
 
 
 	svcAcc, err := coreclient.ServiceAccounts(namespace).Create(&corev1.ServiceAccount{
@@ -95,11 +91,11 @@ func main() {
 		},
 	})
 	if err != nil {
-		fmt.Println("Got error while creating Svc Account...")
+		fmt.Println("\nmain()::Received error while creating Svc Account.")
 		panic(err)
 	}
 	fmt.Println(svcAcc)
-	fmt.Println("Returning ...")
+	fmt.Println("\nmain():: Done. Returning ...")
 
 	/*
 		// To set Template parameters, create a Secret holding overridden parameters
