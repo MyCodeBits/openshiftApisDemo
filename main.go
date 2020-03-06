@@ -77,15 +77,15 @@ func main() {
 	fmt.Printf("main()::Creating passed-in Service Account(s) ..... ")
 	for svcAccsItr := 0; svcAccsItr < len(svcAccsInfoList); svcAccsItr++ {
 		// TODO : SWAPAN check for returned error
-		//createServiceAccount(coreClient, namespace, svcAccsInfoList[svcAccsItr].Name, svcAccsInfoList[svcAccsItr].Labels)
+		createServiceAccount(coreClient, namespace, svcAccsInfoList[svcAccsItr].Name, svcAccsInfoList[svcAccsItr].Labels)
 		fmt.Println("aa")
 		// Create associated Role(s) and Role Bindings(s).
 		// TODO : SWAPAN check for returned error before proceeding
 		for rolesItr :=0; rolesItr < len(svcAccsInfoList[svcAccsItr].Roles); rolesItr ++{
 			fmt.Println("bb")
-			rbacClient.RESTClient()
-			//createRole(rbacClient, namespace, &(svcAccsInfoList[svcAccsItr].Roles[rolesItr]))
-			//createRoleBinding(rbacClient, namespace, svcAccsInfoList[svcAccsItr].Name, &(svcAccsInfoList[svcAccsItr].Roles[rolesItr]))
+			//rbacClient.RESTClient()
+			createRole(rbacClient, namespace, &(svcAccsInfoList[svcAccsItr].Roles[rolesItr]))
+			createRoleBinding(rbacClient, namespace, svcAccsInfoList[svcAccsItr].Name, &(svcAccsInfoList[svcAccsItr].Roles[rolesItr]))
 		}
     //
 		//fmt.Println(secAccInfo)
