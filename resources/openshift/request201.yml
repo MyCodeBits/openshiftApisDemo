@@ -1,0 +1,79 @@
+apiVersion: compute.cloud.cloudera.io/v1alpha1
+kind: NamespaceCRP
+metadata:
+  name: <tenant>.UNCLASSIFIED.<env>.ml-bio.ml-infra
+  clusterId: cluster-id-200
+spec:
+  namespace:
+    name: oc-svc-acc-create # SWAPAN
+    labels:
+      environment: dev
+      key2: value2
+  quota:
+    min:
+      memory: 10G
+      cpu: 2
+      nvidia.com/gpu: 1
+    max:
+      memory: 100G
+      cpu: 10
+      nvidia.com/gpu: 5
+  permissions:
+    - serviceaccounts:
+        - name: ml-service-account
+          labels:
+            Key1: value1
+            Key2: value2
+          roles:
+            - apiVersion: rbac.authorization.k8s.io/v1
+              kind: Role
+              metadata:
+                namespace: oc-svc-acc-create # remove SWAPAN
+                name : access-role-1
+              rules:
+                - apiGroups: [""]
+                  resources: ["configmaps", "secrets", "services"]
+                  verbs: ["get", "list", "create", "update", "delete"]
+                - apiGroups: ["apiextensions.k8s.io"]
+                  resources: ["customresourcedefinitions"]
+                  verbs: ["get", "list", "watch", "create", "update", "delete"]
+            - apiVersion: rbac.authorization.k8s.io/v1
+              kind: ClusterRole
+              metadata:
+                namespace: oc-svc-acc-create # remove SWAPAN
+                name : access-role-2
+              rules:
+                - apiGroups: [""]
+                  resources: ["configmaps", "secrets", "services"]
+                  verbs: ["get", "list", "create", "update", "delete"]
+                - apiGroups: ["apiextensions.k8s.io"]
+                  resources: ["customresourcedefinitions"]
+                  verbs: ["get", "list", "watch", "create", "update", "delete"]
+        - name: ml-operator-account
+          labels:
+            Key1: value1
+            Key2: value2
+          roles:
+            - kind: Role
+              apiVersion: rbac.authorization.k8s.io/v1
+              metadata:
+                name : access-role-3
+              rules:
+                - apiGroups: [""]
+                  resources: ["configmaps", "secrets", "services"]
+                  verbs: ["get", "list", "create", "update", "delete"]
+                - apiGroups: ["apiextensions.k8s.io"]
+                  resources: ["customresourcedefinitions"]
+                  verbs: ["get", "list", "watch", "create", "update", "delete"]
+            - apiVersion: rbac.authorization.k8s.io/v1
+              kind: ClusterRole
+              metadata:
+                name : access-role-4
+              rules:
+                - apiGroups: [""]
+                  resources: ["configmaps", "secrets", "services"]
+                  verbs: ["get", "list", "create", "update", "delete"]
+                - apiGroups: ["apiextensions.k8s.io"]
+                  resources: ["customresourcedefinitions"]
+                  verbs: ["get", "list", "watch", "create", "update", "delete"]
+  resources:
