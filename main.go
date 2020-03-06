@@ -77,12 +77,15 @@ func main() {
 	fmt.Printf("main()::Creating passed-in Service Account(s) ..... ")
 	for svcAccsItr := 0; svcAccsItr < len(svcAccsInfoList); svcAccsItr++ {
 		// TODO : SWAPAN check for returned error
-		createServiceAccount(coreClient, namespace, svcAccsInfoList[svcAccsItr].Name, svcAccsInfoList[svcAccsItr].Labels)
+		//createServiceAccount(coreClient, namespace, svcAccsInfoList[svcAccsItr].Name, svcAccsInfoList[svcAccsItr].Labels)
+		fmt.Println("aa")
 		// Create associated Role(s) and Role Bindings(s).
 		// TODO : SWAPAN check for returned error before proceeding
 		for rolesItr :=0; rolesItr < len(svcAccsInfoList[svcAccsItr].Roles); rolesItr ++{
-			createRole(rbacClient, namespace, &(svcAccsInfoList[svcAccsItr].Roles[rolesItr]))
-			createRoleBinding(rbacClient, namespace, svcAccsInfoList[svcAccsItr].Name, &(svcAccsInfoList[svcAccsItr].Roles[rolesItr]))
+			fmt.Println("bb")
+			rbacClient.RESTClient()
+			//createRole(rbacClient, namespace, &(svcAccsInfoList[svcAccsItr].Roles[rolesItr]))
+			//createRoleBinding(rbacClient, namespace, svcAccsInfoList[svcAccsItr].Name, &(svcAccsInfoList[svcAccsItr].Roles[rolesItr]))
 		}
     //
 		//fmt.Println(secAccInfo)
@@ -100,13 +103,13 @@ func main() {
 	*/
 
 	// 4. Create Svc Account
-	var svcAccName = "prog-sc"
-	var svcAccLabels = map[string]string{
-		"key1": "value1",
-		"key2": "value2",
-	}
+	//var svcAccName = "prog-sc"
+	//var svcAccLabels = map[string]string{
+	//	"key1": "value1",
+	//	"key2": "value2",
+	//}
 
-	createServiceAccount(coreClient, namespace, svcAccName, svcAccLabels)
+	//createServiceAccount(coreClient, namespace, svcAccName, svcAccLabels)
 
 	/*
 		// To set Template parameters, create a Secret holding overridden parameters
@@ -191,33 +194,6 @@ spec:
                 - apiGroups: ["apiextensions.k8s.io"]
                   resources: ["customresourcedefinitions"]
                   verbs: ["get", "list", "watch", "create", "update", "delete"]
-        - name: ml-operator-account
-          labels:
-            Key1: value1
-            Key2: value2
-          roles:
-            - kind: Role
-              apiVersion: rbac.authorization.k8s.io/v1
-              metadata:
-                name : access-role-3
-              rules:
-                - apiGroups: [""]
-                  resources: ["configmaps", "secrets", "services"]
-                  verbs: ["get", "list", "create", "update", "delete"]
-                - apiGroups: ["apiextensions.k8s.io"]
-                  resources: ["customresourcedefinitions"]
-                  verbs: ["get", "list", "watch", "create", "update", "delete"]
-            - apiVersion: rbac.authorization.k8s.io/v1
-              kind: ClusterRole
-              metadata:
-                name : access-role-4
-              rules:
-                - apiGroups: [""]
-                  resources: ["configmaps", "secrets", "services"]
-                  verbs: ["get", "list", "create", "update", "delete"]
-                - apiGroups: ["apiextensions.k8s.io"]
-                  resources: ["customresourcedefinitions"]
-                  verbs: ["get", "list", "watch", "create", "update", "delete"]
   resources:`
 
 	//err = yaml.Unmarshal(data, &namespaceCrp)
@@ -264,6 +240,8 @@ func createRoleBinding(rbacClient *rbacv1client.RbacV1Client, namespace string, 
 		},
 	})
 	if roleErr != nil {
+		fmt.Println("Error creating role Binding")
+		fmt.Println(roleErr)
 		panic(roleErr)
 	}
 	fmt.Printf("\n				main()::Creating RoleBinding  : '%s-role-binding' under Namespace : '%s' for Svc Acc : %s", role.Name, namespace, svcAccName)
@@ -276,6 +254,8 @@ func createRole(rbacClient *rbacv1client.RbacV1Client, namespace string, role *v
 	fmt.Printf("\n			main()::Creating Role  : '%s' under Namespace : '%s'", role.Name, namespace)
 	_, roleErr := rbacClient.Roles(namespace).Create(role)
 	if roleErr != nil {
+		fmt.Println("Error creating role")
+		fmt.Println(roleErr)
 		panic(roleErr)
 	}
 	fmt.Printf("\n			main()::Created Role  : '%s' under Namespace : '%s'", role.Name, namespace)
@@ -297,6 +277,7 @@ func createServiceAccount(coreClient *corev1client.CoreV1Client, namespace strin
 	})
 	if err != nil {
 		fmt.Println("\n		main()::Received error while creating Svc Account.\n")
+		fmt.Println(err)
 		panic(err)
 	}
 	fmt.Printf("		main()::Created Svc Account : '%s'\n\n", svcAccName)
