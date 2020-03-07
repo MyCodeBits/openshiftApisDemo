@@ -58,11 +58,6 @@ func main() {
 	}
 	fmt.Println("main()::Created client\n")
 
-	// INSTANTIATE THE TEMPLATE.
-
-	// 2. Create Secrets
-
-	// 3. Create Roles
 	// Ref : https://github.com/openshift/local-storage-operator/blob/master/pkg/controller/controller.go
 
 	// Create rbac client
@@ -72,44 +67,22 @@ func main() {
 	}
 
 	svcAccsInfoList := nsCrp.Spec.Permissions[0].Serviceaccounts
-	//fmt.Println("main():: secAccInfoList : %s", secAccountsInfoList)
 
 	fmt.Printf("main()::Creating passed-in Service Account(s) ..... ")
 	for svcAccsItr := 0; svcAccsItr < len(svcAccsInfoList); svcAccsItr++ {
 		// TODO : SWAPAN check for returned error
+
 		createServiceAccount(coreClient, namespace, svcAccsInfoList[svcAccsItr].Name, svcAccsInfoList[svcAccsItr].Labels)
-		fmt.Println("aa")
+
 		// Create associated Role(s) and Role Bindings(s).
 		// TODO : SWAPAN check for returned error before proceeding
 		for rolesItr :=0; rolesItr < len(svcAccsInfoList[svcAccsItr].Roles); rolesItr ++{
-			fmt.Println("bb")
-			//rbacClient.RESTClient()
 			createRole(rbacClient, namespace, &(svcAccsInfoList[svcAccsItr].Roles[rolesItr]))
 			createRoleBinding(rbacClient, namespace, svcAccsInfoList[svcAccsItr].Name, &(svcAccsInfoList[svcAccsItr].Roles[rolesItr]))
+
 		}
-    //
-		//fmt.Println(secAccInfo)
+
 	}
-
-
-	/*
-	var roleName = "prog-role1"
-
-	if roleErr != nil {
-		panic(err)
-	}
-	fmt.Println(role)
-
-	*/
-
-	// 4. Create Svc Account
-	//var svcAccName = "prog-sc"
-	//var svcAccLabels = map[string]string{
-	//	"key1": "value1",
-	//	"key2": "value2",
-	//}
-
-	//createServiceAccount(coreClient, namespace, svcAccName, svcAccLabels)
 
 	/*
 		// To set Template parameters, create a Secret holding overridden parameters
@@ -139,10 +112,11 @@ func main() {
 func readAndMapCrpFile(path string) (NamespaceCrp, error) {
 	// Read roles file
 	namespaceCrp := NamespaceCrp{}
-	/*data, err := ReadFile(path)
+	data, err := ReadFile(path)
 	if err != nil {
-	}*/
+	}
 
+	/*
 	var data = `apiVersion: compute.cloud.cloudera.io/v1alpha1
 kind: NamespaceCRP
 metadata:
@@ -150,7 +124,7 @@ metadata:
   clusterId: cluster-id-200
 spec:
   namespace:
-    name: oc-svc-acc-create # SWAPAN
+    name: default # SWAPAN
     labels:
       environment: dev
       key2: value2
@@ -173,7 +147,7 @@ spec:
             - apiVersion: rbac.authorization.k8s.io/v1
               kind: Role
               metadata:
-                namespace: oc-svc-acc-create # remove SWAPAN
+                namespace: default # remove SWAPAN
                 name : access-role-1
               rules:
                 - apiGroups: [""]
@@ -185,7 +159,7 @@ spec:
             - apiVersion: rbac.authorization.k8s.io/v1
               kind: ClusterRole
               metadata:
-                namespace: oc-svc-acc-create # remove SWAPAN
+                namespace: default # remove SWAPAN
                 name : access-role-2
               rules:
                 - apiGroups: [""]
@@ -194,7 +168,37 @@ spec:
                 - apiGroups: ["apiextensions.k8s.io"]
                   resources: ["customresourcedefinitions"]
                   verbs: ["get", "list", "watch", "create", "update", "delete"]
+        - name: ml-operator-account
+          labels:
+            Key1: value1
+            Key2: value2
+          roles:
+            - apiVersion: rbac.authorization.k8s.io/v1
+              kind: Role
+              metadata:
+                namespace: default # remove SWAPAN
+                name : access-role-3
+              rules:
+                - apiGroups: [""]
+                  resources: ["configmaps", "secrets", "services"]
+                  verbs: ["get", "list", "create", "update", "delete"]
+                - apiGroups: ["apiextensions.k8s.io"]
+                  resources: ["customresourcedefinitions"]
+                  verbs: ["get", "list", "watch", "create", "update", "delete"]
+            - apiVersion: rbac.authorization.k8s.io/v1
+              kind: ClusterRole
+              metadata:
+                namespace: default # remove SWAPAN
+                name : access-role-4
+              rules:
+                - apiGroups: [""]
+                  resources: ["configmaps", "secrets", "services"]
+                  verbs: ["get", "list", "create", "update", "delete"]
+                - apiGroups: ["apiextensions.k8s.io"]
+                  resources: ["customresourcedefinitions"]
+                  verbs: ["get", "list", "watch", "create", "update", "delete"]
   resources:`
+	*/
 
 	//err = yaml.Unmarshal(data, &namespaceCrp)
 	//return namespaceCrp, err
@@ -214,9 +218,14 @@ spec:
 	return namespaceCrp, err
 }
 
+// TODO : CLuster Role binding
+// Rmeove list of serviceaccounts
+// cleanup code
+// Secrets
 // TODO : SWAPAN Check Do we have RoleBinding only.. or we create ClusterRoleBinding also sometimes ?
 func createRoleBinding(rbacClient *rbacv1client.RbacV1Client, namespace string, svcAccName string, role *v1.Role) {
-	fmt.Printf("\n				main()::Creating RoleBinding  : '%s-role-binding' under Namespace : '%s' for Svc Acc : %s", role.Name, namespace, svcAccName)
+	fmt.Printf("\n				main()::Creating RoleBinding  : '%s-role-binding' under Namespace : " +
+		"'%s' for Svc Acc : '%s'", role.Name, namespace, svcAccName)
 	_, roleErr := rbacClient.RoleBindings(namespace).Create(&v1.RoleBinding{
 		// TODO : What about TypeMeta.. Add it.
 		ObjectMeta: metav1.ObjectMeta{
@@ -244,21 +253,22 @@ func createRoleBinding(rbacClient *rbacv1client.RbacV1Client, namespace string, 
 		fmt.Println(roleErr)
 		panic(roleErr)
 	}
-	fmt.Printf("\n				main()::Creating RoleBinding  : '%s-role-binding' under Namespace : '%s' for Svc Acc : %s", role.Name, namespace, svcAccName)
+	fmt.Printf("\n				main()::Created RoleBinding  : '%s-role-binding' under " +
+		"Namespace : '%s' for Svc Acc : '%s'\n", role.Name, namespace, svcAccName)
 }
 
 
 // TODO : Tie the fn.s so that their type/object only can call them rather than having plain fns and passing the client
 // Create
 func createRole(rbacClient *rbacv1client.RbacV1Client, namespace string, role *v1.Role) {
-	fmt.Printf("\n			main()::Creating Role  : '%s' under Namespace : '%s'", role.Name, namespace)
+	fmt.Printf("			main()::Creating Role  : '%s' under Namespace : '%s'\n", role.Name, namespace)
 	_, roleErr := rbacClient.Roles(namespace).Create(role)
 	if roleErr != nil {
 		fmt.Println("Error creating role")
 		fmt.Println(roleErr)
 		panic(roleErr)
 	}
-	fmt.Printf("\n			main()::Created Role  : '%s' under Namespace : '%s'", role.Name, namespace)
+	fmt.Printf("			main()::Created Role  : '%s' under Namespace : '%s'", role.Name, namespace)
 }
 
 
@@ -268,7 +278,7 @@ func createServiceAccount(coreClient *corev1client.CoreV1Client, namespace strin
 	fmt.Printf("\n		main()::Creating Svc Account : '%s'", svcAccName)
 
   // TODO : What about TypeMeta.. Add it.
-	svcAcc, err := coreClient.ServiceAccounts(namespace).Create(&corev1.ServiceAccount{
+	_, err := coreClient.ServiceAccounts(namespace).Create(&corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: svcAccName,
 			Namespace: namespace,
@@ -280,8 +290,8 @@ func createServiceAccount(coreClient *corev1client.CoreV1Client, namespace strin
 		fmt.Println(err)
 		panic(err)
 	}
-	fmt.Printf("		main()::Created Svc Account : '%s'\n\n", svcAccName)
-	fmt.Println(svcAcc)
+	fmt.Printf("\n		main()::Created Svc Account : '%s'\n", svcAccName)
+	//fmt.Println(svcAcc)
 }
 
 // Lists Service Accounts
