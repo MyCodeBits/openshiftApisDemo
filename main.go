@@ -15,6 +15,11 @@ import (
 	v1 "k8s.io/api/rbac/v1" // TODO. Named it v1 as typecasting issues. Fix this. Earlier was rbacv1
 )
 
+type Rbac struct {
+	client *rbacv1client.RbacV1Client
+	Err error
+}
+
 func main() {
 	fmt.Println("main()::RedHat Openshift APIs Demo ....")
 
@@ -61,7 +66,11 @@ func main() {
 	// Ref : https://github.com/openshift/local-storage-operator/blob/master/pkg/controller/controller.go
 
 	// Create rbac client
-	rbacClient, rbacClientErr := rbacv1client.NewForConfig(restconfig)
+	var rbac Rbac
+	var rbacClientErr error
+	rbac.client, err = rbacv1client.NewForConfig(restconfig)
+	//rbacClient1.Mm = rbacClient
+	//rbacClient1.Mm
 	if rbacClientErr != nil {
 		panic(err)
 	}
@@ -77,9 +86,8 @@ func main() {
 		// Create associated Role(s) and Role Bindings(s).
 		// TODO : SWAPAN check for returned error before proceeding
 		for rolesItr :=0; rolesItr < len(svcAccsInfoList[svcAccsItr].Roles); rolesItr ++{
-			createRole(rbacClient, namespace, &(svcAccsInfoList[svcAccsItr].Roles[rolesItr]))
-			createRoleBinding(rbacClient, namespace, svcAccsInfoList[svcAccsItr].Name, &(svcAccsInfoList[svcAccsItr].Roles[rolesItr]))
-
+			rbac.createRole(namespace, &(svcAccsInfoList[svcAccsItr].Roles[rolesItr]))
+			rbac.CreateRoleBinding(namespace, svcAccsInfoList[svcAccsItr].Name, &(svcAccsInfoList[svcAccsItr].Roles[rolesItr]))
 		}
 
 	}
@@ -219,14 +227,14 @@ spec:
 }
 
 // TODO : CLuster Role binding
-// Rmeove list of serviceaccounts
+// Remove list of service Accounts
 // cleanup code
 // Secrets
 // TODO : SWAPAN Check Do we have RoleBinding only.. or we create ClusterRoleBinding also sometimes ?
-func createRoleBinding(rbacClient *rbacv1client.RbacV1Client, namespace string, svcAccName string, role *v1.Role) {
+func (rbacClient Rbac) CreateRoleBinding(namespace string, svcAccName string, role *v1.Role) {
 	fmt.Printf("\n				main()::Creating RoleBinding  : '%s-role-binding' under Namespace : " +
 		"'%s' for Svc Acc : '%s'", role.Name, namespace, svcAccName)
-	_, roleErr := rbacClient.RoleBindings(namespace).Create(&v1.RoleBinding{
+	_, roleErr := rbacClient.client.RoleBindings(namespace).Create(&v1.RoleBinding{
 		// TODO : What about TypeMeta.. Add it.
 		ObjectMeta: metav1.ObjectMeta{
 			Name: role.Name + "-role-binding", // TODO : SWAPAN check
@@ -260,9 +268,9 @@ func createRoleBinding(rbacClient *rbacv1client.RbacV1Client, namespace string, 
 
 // TODO : Tie the fn.s so that their type/object only can call them rather than having plain fns and passing the client
 // Create
-func createRole(rbacClient *rbacv1client.RbacV1Client, namespace string, role *v1.Role) {
+func (rbacClient Rbac) createRole(namespace string, role *v1.Role) {
 	fmt.Printf("			main()::Creating Role  : '%s' under Namespace : '%s'\n", role.Name, namespace)
-	_, roleErr := rbacClient.Roles(namespace).Create(role)
+	_, roleErr := rbacClient.client.Roles(namespace).Create(role)
 	if roleErr != nil {
 		fmt.Println("Error creating role")
 		fmt.Println(roleErr)
